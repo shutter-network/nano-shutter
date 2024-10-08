@@ -1,8 +1,11 @@
 # NanoShutter
 
-NanoShutter is a simplified implementation of the [Shutter Network](https://shutter.network/) protocol designed specifically for hackathons and educational purposes. It provides a lightweight framework for developers to integrate time-locked encryption into their decentralized applications (DApps) or other projects without the complexity of the full Shutter protocol.
+NanoShutter is a simplified implementation of the [Shutter Network](https://shutter.network/) protocol designed specifically for hackathons and educational purposes. It provides a lightweight framework for developers to integrate time-locked encryption into their decentralized applications (DApps) or other projects without the complexity of the full Shutter protocol. It's fully centralized and unsafe to use in any kind of production environment.
 
 NanoShutter allows you to encrypt messages or transactions that can only be decrypted after a certain time (epoch), enabling use cases like front-running protection, sealed-bid auctions, or fair multiplayer games.
+
+![ezgif-3-0169c86877](https://github.com/user-attachments/assets/61c6573e-ede3-4fcc-82e8-39d61a92af40)
+
 
 ---
 
