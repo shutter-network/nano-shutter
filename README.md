@@ -321,7 +321,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 **Disclaimer:** NanoShutter is not affiliated with or endorsed by the Shutter Network. It is a simplified tool created for learning and hackathon projects.
 
-**Contact:** For questions or support, please open an issue on the repository or reach out to [your-email@example.com](mailto:your-email@example.com).
+**Contact:** For questions or support, please open an issue on the repository.
 
 ---
 
