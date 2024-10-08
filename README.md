@@ -1,609 +1,325 @@
-# Shutterized Rock Paper Scissors - Full Documentation
+# NanoShutter
+
+NanoShutter is a simplified implementation of the [Shutter Network](https://shutter.network/) protocol designed specifically for hackathons and educational purposes. It provides a lightweight framework for developers to integrate time-locked encryption into their decentralized applications (DApps) or other projects without the complexity of the full Shutter protocol.
+
+NanoShutter allows you to encrypt messages or transactions that can only be decrypted after a certain time (epoch), enabling use cases like front-running protection, sealed-bid auctions, or fair multiplayer games.
+
+---
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Architecture Overview](#architecture-overview)
-3. [Cryptographic Protocol](#cryptographic-protocol)
-4. [Setup and Installation](#setup-and-installation)
-   - [Prerequisites](#prerequisites)
-   - [Installation Steps](#installation-steps)
-5. [Detailed Code Explanation](#detailed-code-explanation)
-   - [Server-Side: `nano_shutter_api.py`](#server-side-nano_shutter_apipy)
-   - [Client-Side: `nano_shutter_crypto.js`](#client-side-nano_shutter_cryptojs)
-   - [User Interface: `index.html`](#user-interface-indexhtml)
-6. [Usage Instructions](#usage-instructions)
-7. [Security Considerations](#security-considerations)
-8. [Troubleshooting](#troubleshooting)
-9. [Conclusion](#conclusion)
-10. [References](#references)
+- [Introduction](#introduction)
+- [Features](#features)
+- [Architecture Overview](#architecture-overview)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+  - [1. Running the NanoShutter API Server](#1-running-the-nanoshutter-api-server)
+  - [2. Integrating the Client-Side Library](#2-integrating-the-client-side-library)
+  - [3. Example Application: Shutterized Rock Paper Scissors](#3-example-application-shutterized-rock-paper-scissors)
+- [API Reference](#api-reference)
+- [How It Works](#how-it-works)
+- [Customization](#customization)
+- [Limitations](#limitations)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
 ## Introduction
 
-**Shutterized Rock Paper Scissors** is a web-based implementation of the classic game "Rock Paper Scissors" that incorporates advanced cryptographic techniques to ensure fairness and security. The game uses a commit-reveal scheme based on elliptic curve cryptography to prevent cheating and ensure that neither player can influence the outcome after moves are submitted.
+**NanoShutter** is tailored to help developers quickly prototype and demonstrate applications that require time-locked encryption. By abstracting the complexities of cryptographic operations and key management, NanoShutter enables you to focus on building your application's logic.
 
-This documentation provides a comprehensive guide to understanding, setting up, and running the application, as well as detailed explanations of the code and cryptographic protocols used.
+Whether you're participating in a hackathon, teaching cryptography concepts, or exploring new ideas, NanoShutter provides an accessible entry point to time-based encryption mechanisms.
+
+---
+
+## Features
+
+- **Simplified API:** Easy-to-use endpoints for fetching public keys and decryption keys.
+- **Client-Side Library:** JavaScript library (`nano_shutter_crypto.js`) for encryption and decryption operations.
+- **Time-Locked Encryption:** Encrypt messages that can only be decrypted after a specified epoch.
+- **Lightweight Server:** Minimal Flask server (`nano_shutter_api.py`) to manage keys and epochs.
+- **Educational Tool:** Ideal for learning and teaching cryptographic concepts.
+- **Hackathon Ready:** Quickly integrate into projects to add security and fairness features.
 
 ---
 
 ## Architecture Overview
 
-The application consists of three main components:
+NanoShutter consists of two main components:
 
-1. **Server-Side API (`nano_shutter_api.py`):** A Flask-based Python server that manages cryptographic keys, provides public keys for encryption, and releases decryption keys at specified intervals.
+1. **NanoShutter API Server (`nano_shutter_api.py`):**
+   - Manages cryptographic keys (eon keys and epoch keys).
+   - Provides endpoints to fetch the eon public key, epoch public keys, and decryption keys.
+   - Simulates the behavior of a keyper committee in the Shutter Network.
 
-2. **Client-Side Cryptography Library (`nano_shutter_crypto.js`):** A JavaScript library that handles encryption and decryption of messages using the cryptographic protocols defined.
-
-3. **User Interface (`index.html`):** An HTML page with embedded JavaScript that provides the game interface, allowing two players to submit their moves and view the results.
-
-**Interaction Flow:**
-
-- Players select and submit their moves via the web interface.
-- The client-side cryptography library encrypts the moves using public keys obtained from the server.
-- Encrypted moves are displayed, and the server periodically releases decryption keys.
-- Once decryption keys are available, the client decrypts the moves and determines the winner.
+2. **Client-Side Library (`nano_shutter_crypto.js`):**
+   - Handles encryption and decryption of messages.
+   - Communicates with the NanoShutter API Server to obtain necessary keys.
+   - Provides functions to integrate time-locked encryption into your application.
 
 ---
 
-## Cryptographic Protocol
-
-The application uses a **commit-reveal scheme** to ensure fairness:
-
-1. **Commit Phase:**
-
-   - Each player encrypts their move using a shared secret derived from ephemeral keys and the server's epoch public key.
-   - The encryption ensures that the move cannot be altered or revealed until the decryption key is available.
-
-2. **Reveal Phase:**
-
-   - The server releases the decryption keys after a fixed epoch duration.
-   - Players (or the client application) use these keys to decrypt the moves.
-   - Since the decryption keys are released simultaneously, neither player can gain an advantage.
-
-**Key Components:**
-
-- **Eon Key:** A long-term public/private key pair generated by the server, used to derive epoch keys.
-
-- **Epoch Keys:** Short-term keys derived from the eon key, changing every epoch (a fixed time interval).
-
-- **Ephemeral Keys:** Temporary keys generated by the client for each encryption session.
-
-**Encryption Process:**
-
-1. Clients fetch the current epoch public key from the server.
-2. Clients generate ephemeral key pairs.
-3. A shared secret is derived using the client's ephemeral private key and the server's epoch public key.
-4. The shared secret is combined with the epoch number and hashed to produce a symmetric key.
-5. The move is encrypted using this symmetric key and a random nonce.
-
-**Decryption Process:**
-
-1. Clients fetch the decryption key (epoch private key) from the server once it becomes available.
-2. The shared secret is re-derived using the epoch private key and the client's ephemeral public key.
-3. The symmetric key is recomputed, and the move is decrypted.
-
----
-
-## Setup and Installation
+## Getting Started
 
 ### Prerequisites
 
 - **Python 3.6+**
-- **Node.js and npm (Optional for serving the HTML page)**
+- **Node.js and npm** (for frontend development)
 - **Flask** and **PyNaCl** Python packages
 - Modern web browser (Google Chrome, Mozilla Firefox, etc.)
 
-### Installation Steps
+### Installation
 
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/your-repo/shutterized-rock-paper-scissors.git
-   cd shutterized-rock-paper-scissors
+   git clone https://github.com/your-username/nanoshutter.git
+   cd nanoshutter
    ```
 
-2. **Set Up the Server:**
+2. **Install Python Dependencies:**
 
-   - Install Python dependencies:
+   ```bash
+   pip install flask pynacl
+   ```
 
-     ```bash
-     pip install flask pynacl
-     ```
+3. **Install Frontend Dependencies (if using the example application):**
 
-   - Run the server:
-
-     ```bash
-     python nano_shutter_api.py
-     ```
-
-     The server will start on `http://localhost:5000`.
-
-3. **Set Up the Client:**
-
-   - Ensure that `index.html` and `nano_shutter_crypto.js` are in the same directory.
-
-   - Since the client is a static HTML page, you can open `index.html` directly in your browser.
-
-   - **Optional:** For serving the HTML page over `http://localhost`, you can use a simple HTTP server:
-
-     - Using Python 3:
-
-       ```bash
-       python -m http.server 8000
-       ```
-
-     - Using Node.js:
-
-       ```bash
-       npx http-server -p 8000
-       ```
-
-     - Open your browser and navigate to `http://localhost:8000/index.html`.
+   ```bash
+   cd frontend
+   npm install
+   ```
 
 ---
 
-## Detailed Code Explanation
+## Usage
 
-### Server-Side: `nano_shutter_api.py`
+### 1. Running the NanoShutter API Server
 
-**Overview:**
-
-- A Flask application that serves as the backend API.
-- Manages cryptographic keys and provides endpoints for clients to fetch public keys and decryption keys.
-
-**Key Components:**
-
-1. **Imports:**
+Start the NanoShutter API server to manage cryptographic keys:
 
-   ```python
-   from flask import Flask, jsonify, request
-   from nacl.public import PrivateKey, PublicKey
-   from nacl.encoding import HexEncoder
-   import time
-   import threading
-   ```
+```bash
+python nano_shutter_api.py
+```
 
-2. **Global Variables:**
+By default, the server runs on `http://localhost:5000`.
 
-   - **Eon Key Pair:**
+### 2. Integrating the Client-Side Library
 
-     ```python
-     eon_private_key = PrivateKey.generate()
-     eon_public_key = eon_private_key.public_key
-     ```
+Include the `nano_shutter_crypto.js` script in your HTML file:
 
-   - **Epoch Duration:**
+```html
+<script src="nano_shutter_crypto.js"></script>
+```
 
-     ```python
-     EPOCH_DURATION = 10  # seconds
-     ```
+Initialize the NanoShutter client in your JavaScript code:
 
-   - **Epoch Keys Storage:**
+```javascript
+const nanoShutter = new NanoShutterCrypto('http://localhost:5000');
+await nanoShutter.initialize();
+await nanoShutter.fetchEonKey();
+```
 
-     ```python
-     epoch_keys = {}
-     ```
+Use the provided methods to encrypt and decrypt messages:
 
-3. **Background Thread for Epoch Key Generation:**
+```javascript
+// Encrypt a message
+const encryptedData = await nanoShutter.encryptMessage("Your secret message");
 
-   - Generates new epoch keys every epoch.
-   - Stores epoch private keys for decryption.
+// Decrypt a message
+const decryptedMessage = await nanoShutter.decryptMessage(encryptedData);
+```
 
-   ```python
-   def generate_epoch_keys():
-       while True:
-           current_epoch = int(time.time() // EPOCH_DURATION)
-           if current_epoch not in epoch_keys:
-               # Derive epoch private key
-               epoch_seed = eon_private_key.encode() + current_epoch.to_bytes(8, 'big')
-               epoch_private_key = PrivateKey(epoch_seed[:32])
-               epoch_keys[current_epoch] = epoch_private_key
-           time.sleep(1)
-   ```
+### 3. Example Application: Shutterized Rock Paper Scissors
 
-4. **API Endpoints:**
+We've included an example application demonstrating how to use NanoShutter in a real-world scenario.
 
-   - **`/eon-key`:**
+#### Running the Example
 
-     Returns the eon public key and epoch duration.
-
-     ```python
-     @app.route('/eon-key', methods=['GET'])
-     def get_eon_key():
-         return jsonify({
-             'eon_public_key': eon_public_key.encode(encoder=HexEncoder).decode(),
-             'epoch_duration': EPOCH_DURATION,
-             'current_epoch': int(time.time() // EPOCH_DURATION)
-         })
-     ```
-
-   - **`/epoch-public-key`:**
-
-     Returns the epoch public key for a given epoch.
-
-     ```python
-     @app.route('/epoch-public-key', methods=['GET'])
-     def get_epoch_public_key():
-         epoch = int(request.args.get('epoch'))
-         if epoch in epoch_keys:
-             epoch_public_key = epoch_keys[epoch].public_key
-             return jsonify({
-                 'epoch_public_key': epoch_public_key.encode(encoder=HexEncoder).decode()
-             })
-         else:
-             return jsonify({'error': 'Epoch key not found'}), 404
-     ```
-
-   - **`/decryption-key`:**
-
-     Provides the epoch private key for decryption after the epoch has ended.
-
-     ```python
-     @app.route('/decryption-key', methods=['GET'])
-     def get_decryption_key():
-         epoch = int(request.args.get('epoch'))
-         if epoch < int(time.time() // EPOCH_DURATION):
-             if epoch in epoch_keys:
-                 epoch_private_key = epoch_keys[epoch]
-                 return jsonify({
-                     'epoch_private_key': epoch_private_key.encode(encoder=HexEncoder).decode()
-                 })
-         return jsonify({'error': 'Decryption key not available yet'}), 404
-     ```
-
-### Client-Side: `nano_shutter_crypto.js`
-
-**Overview:**
-
-- Handles encryption and decryption of messages.
-- Communicates with the server to fetch necessary keys.
-
-**Key Components:**
-
-1. **Class `NanoShutterCrypto`:**
-
-   Manages cryptographic operations.
-
-   ```javascript
-   class NanoShutterCrypto {
-     constructor(apiUrl) {
-       this.apiUrl = apiUrl;
-       this.eonPublicKey = null;
-       this.epochDuration = null;
-     }
-     // Methods...
-   }
-   ```
-
-2. **Initialization and Key Fetching:**
-
-   - **`initialize()`:**
-
-     Waits for `libsodium` to be ready.
-
-     ```javascript
-     async initialize() {
-       await sodium.ready;
-     }
-     ```
-
-   - **`fetchEonKey()`:**
-
-     Fetches the eon public key and epoch duration from the server.
-
-     ```javascript
-     async fetchEonKey() {
-       const response = await axios.get(`${this.apiUrl}/eon-key`);
-       this.eonPublicKey = sodium.from_hex(response.data.eon_public_key);
-       this.epochDuration = response.data.epoch_duration;
-     }
-     ```
-
-3. **Epoch Calculation:**
-
-   - **`getCurrentEpoch()`:**
-
-     Calculates the current epoch based on the current time and epoch duration.
-
-     ```javascript
-     getCurrentEpoch() {
-       if (!this.epochDuration) {
-         throw new Error('Epoch duration is not defined. Call fetchEonKey() first.');
-       }
-       const currentTime = Math.floor(Date.now() / 1000);
-       const epochNumber = Math.floor(currentTime / this.epochDuration);
-       return epochNumber;
-     }
-     ```
-
-4. **Encryption:**
-
-   - **`encryptMessage(message)`:**
-
-     - Fetches the epoch public key.
-     - Generates an ephemeral key pair.
-     - Derives a shared secret.
-     - Encrypts the message using the derived symmetric key.
-
-     ```javascript
-     async encryptMessage(message) {
-       // Ensure keys are fetched
-       if (!this.eonPublicKey || !this.epochDuration) {
-         await this.fetchEonKey();
-       }
-
-       const epoch = this.getCurrentEpoch();
-       // Fetch epoch public key
-       // Generate ephemeral keys
-       // Derive shared secret
-       // Encrypt message
-       // Return encrypted data
-     }
-     ```
-
-5. **Decryption:**
-
-   - **`decryptMessage(encryptedData)`:**
-
-     - Fetches the epoch private key.
-     - Re-derives the shared secret.
-     - Decrypts the message using the derived symmetric key.
-
-     ```javascript
-     async decryptMessage(encryptedData) {
-       // Ensure keys are fetched
-       // Fetch decryption key
-       // Derive shared secret
-       // Decrypt message
-       // Return decrypted message
-     }
-     ```
-
-6. **Helper Functions:**
-
-   - **`concatUint8Arrays(arrays)`:**
-
-     Concatenates multiple `Uint8Array` instances.
-
-     ```javascript
-     function concatUint8Arrays(arrays) {
-       // Implementation...
-     }
-     ```
-
-### User Interface: `index.html`
-
-**Overview:**
-
-- Provides the web interface for players to interact with the game.
-- Displays encrypted and decrypted moves, game status, and decryption keys.
-
-**Key Components:**
-
-1. **HTML Structure:**
-
-   - **Player Sections:**
-
-     Allows each player to select and submit their move.
-
-     ```html
-     <div class="player-section">
-       <h2>Player 1</h2>
-       <!-- Move selection and submit button -->
-     </div>
-     ```
-
-   - **Status Message:**
-
-     Displays the current status of the game.
-
-     ```html
-     <h2>Status</h2>
-     <p id="status" class="status">Waiting for players to submit their moves...</p>
-     ```
-
-   - **Encrypted and Decrypted Moves:**
-
-     Shows the encrypted data and decrypted moves.
-
-     ```html
-     <h2>Encrypted Moves</h2>
-     <div id="encryptedMoves"></div>
-
-     <h2>Decrypted Moves</h2>
-     <div id="decryptedMoves" class="data-section"></div>
-     ```
-
-   - **Game Result and New Game Button:**
-
-     Displays the result and allows starting a new game.
-
-     ```html
-     <h2>Game Result</h2>
-     <p id="gameResult" class="game-result"></p>
-
-     <button id="newGame" class="btn btn-success btn-new-game">Start New Game</button>
-     ```
-
-   - **Sidebar for Decryption Keys:**
-
-     Displays the decryption keys dynamically.
-
-     ```html
-     <div class="sidebar">
-       <h2>Decryption Keys</h2>
-       <div id="decryptionKeys" class="data-section"></div>
-     </div>
-     ```
-
-2. **Styling (CSS):**
-
-   - Uses Bootstrap for basic styling.
-   - Custom styles for layout and formatting.
-
-3. **Scripts and Dependencies:**
-
-   - **Libraries:**
-
-     - `axios` for HTTP requests.
-     - `libsodium-wrappers` for cryptographic functions.
-     - `jQuery` and `Bootstrap JS` for tooltips and interactivity.
-     - `Clipboard.js` for copy-to-clipboard functionality.
-
-   - **Main Script:**
-
-     - Initializes the `NanoShutterCrypto` class.
-     - Handles user interactions and game logic.
-     - Periodically attempts to decrypt moves and fetch decryption keys.
-
-     ```javascript
-     (async () => {
-       // Initialization
-       // Event handlers for move submission
-       // Functions for displaying data
-       // Interval for decryption attempts
-     })();
-     ```
-
----
-
-## Usage Instructions
-
-1. **Start the Server:**
-
-   Ensure that `nano_shutter_api.py` is running:
+1. **Start the API Server:**
 
    ```bash
    python nano_shutter_api.py
    ```
 
-2. **Open the Game Interface:**
+2. **Open the `index.html` File:**
 
    - Open `index.html` in your web browser.
-   - If using a local server, navigate to `http://localhost:8000/index.html`.
+   - Alternatively, serve it using a local server:
 
-3. **Play the Game:**
+     ```bash
+     cd frontend
+     npx http-server -p 8000
+     ```
 
-   - **Player 1:**
+     Navigate to `http://localhost:8000` in your browser.
 
-     - Select a move (Rock, Paper, or Scissors) from the dropdown.
-     - Click the "Submit Move" button.
+#### How the Example Works
 
-   - **Player 2:**
-
-     - Repeat the same steps as Player 1.
-
-4. **View Encrypted Moves:**
-
-   - Encrypted moves will be displayed under "Encrypted Moves" in a formatted table.
-
-5. **Wait for Decryption:**
-
-   - The application will periodically check for decryption keys.
-   - Once available (after the epoch duration), moves will be decrypted.
-
-6. **View Decrypted Moves and Game Result:**
-
-   - Decrypted moves appear under "Decrypted Moves."
-   - The game result (winner) is displayed under "Game Result."
-
-7. **Start a New Game:**
-
-   - Click the "Start New Game" button to reset the game and play again.
-
-8. **View Decryption Keys:**
-
-   - The sidebar displays decryption keys for recent epochs.
-   - Keys are truncated for readability; hover over a key to see the full value.
-   - Use the "Copy" button to copy a key to the clipboard.
+- Two players select and submit their moves (Rock, Paper, or Scissors).
+- Moves are encrypted using NanoShutter and displayed on the page.
+- The API server releases decryption keys after the epoch ends.
+- The client decrypts the moves and determines the winner.
 
 ---
 
-## Security Considerations
+## API Reference
 
-1. **Commit-Reveal Fairness:**
+### Endpoints
 
-   - The use of cryptography ensures that players cannot change their moves after submission.
-   - Decryption keys are released simultaneously to prevent any player from gaining an advantage.
+- **GET `/eon-key`**
 
-2. **Public Key Display:**
+  Retrieves the eon public key and epoch duration.
 
-   - Only public keys are displayed; private keys remain secure on the server.
-   - Ensure that no sensitive information is exposed in logs or UI elements.
+  **Response:**
 
-3. **Epoch Duration:**
+  ```json
+  {
+    "eon_public_key": "hexadecimal_string",
+    "epoch_duration": 10,
+    "current_epoch": 123456
+  }
+  ```
 
-   - The epoch duration is set to 10 seconds for demonstration purposes.
-   - In a production environment, consider adjusting the duration based on security requirements.
+- **GET `/epoch-public-key?epoch=<epoch_number>`**
 
-4. **Server Security:**
+  Retrieves the epoch public key for the specified epoch.
 
-   - Protect the server from unauthorized access.
-   - Secure communication channels (e.g., use HTTPS) to prevent man-in-the-middle attacks.
+  **Response:**
 
-5. **Client-Side Security:**
+  ```json
+  {
+    "epoch_public_key": "hexadecimal_string"
+  }
+  ```
 
-   - Be cautious of exposing cryptographic operations on the client side.
-   - Ensure that third-party libraries (e.g., `libsodium-wrappers`) are up-to-date and obtained from trusted sources.
+- **GET `/decryption-key?epoch=<epoch_number>&ephemeral_public_key=<hex_string>`**
 
-6. **Denial of Service (DoS) Attacks:**
+  Retrieves the decryption key for the specified epoch and ephemeral public key.
 
-   - Implement rate limiting on the server to prevent abuse of the API endpoints.
+  **Response:**
 
----
-
-## Troubleshooting
-
-1. **Server Not Running:**
-
-   - Ensure `nano_shutter_api.py` is running and accessible at `http://localhost:5000`.
-   - Check for errors in the server console.
-
-2. **Epoch Infinity Error:**
-
-   - Ensure `fetchEonKey()` is called before any function that depends on `epochDuration`.
-   - Verify that `epochDuration` is not zero or undefined.
-
-3. **Cryptographic Function Errors:**
-
-   - Verify that the correct version of `libsodium-wrappers` is included.
-   - Adjust cryptographic function calls in `nano_shutter_crypto.js` to match the library version.
-
-4. **UI Not Displaying Correctly:**
-
-   - Ensure all CSS and JS dependencies are correctly included.
-   - Check the browser console for any JavaScript errors.
-
-5. **Decryption Keys Not Updating:**
-
-   - Confirm that the server is generating and releasing decryption keys.
-   - Check network requests in the browser's developer tools for any failed API calls.
-
-6. **Moves Not Decrypting:**
-
-   - Wait until the epoch has ended; decryption keys are only available after the epoch duration.
-   - Ensure both players have submitted their moves.
+  ```json
+  {
+    "epoch_private_key": "hexadecimal_string"
+  }
+  ```
 
 ---
 
-## Conclusion
+## How It Works
 
-The Shutterized Rock Paper Scissors game demonstrates the integration of cryptographic techniques into a simple web application to ensure fairness and security. By utilizing a commit-reveal scheme and carefully managing cryptographic keys, the game prevents cheating and provides an engaging experience for users interested in cryptography and secure communication.
+1. **Eon Key Generation:**
 
-This documentation covers the architecture, setup, code explanations, usage instructions, and security considerations to help you understand and run the application effectively.
+   - The server generates a long-term eon key pair (public and private keys).
+
+2. **Epoch Key Derivation:**
+
+   - Every epoch (fixed time interval), the server derives a new epoch private key from the eon private key and the current epoch number.
+   - The epoch public key is derived from the epoch private key.
+
+3. **Message Encryption:**
+
+   - The client fetches the current epoch public key.
+   - The client generates an ephemeral key pair.
+   - A shared secret is derived using the client's ephemeral private key and the server's epoch public key.
+   - The shared secret and epoch number are hashed to produce a symmetric key.
+   - The message is encrypted using this symmetric key.
+
+4. **Message Decryption:**
+
+   - After the epoch ends, the server releases the epoch private key.
+   - The client re-derives the shared secret using the epoch private key and the ephemeral public key.
+   - The symmetric key is recomputed, and the message is decrypted.
 
 ---
 
-## References
+## Customization
 
-- **Libsodium Documentation:** [https://libsodium.gitbook.io/doc/](https://libsodium.gitbook.io/doc/)
-- **PyNaCl Documentation:** [https://pynacl.readthedocs.io/](https://pynacl.readthedocs.io/)
-- **Flask Documentation:** [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
-- **Clipboard.js:** [https://clipboardjs.com/](https://clipboardjs.com/)
-- **Bootstrap Documentation:** [https://getbootstrap.com/docs/3.4/](https://getbootstrap.com/docs/3.4/)
+- **Epoch Duration:**
+
+  Adjust the `EPOCH_DURATION` variable in `nano_shutter_api.py` to change the duration of each epoch.
+
+  ```python
+  EPOCH_DURATION = 10  # seconds
+  ```
+
+- **Key Management:**
+
+  For more advanced use cases, modify the key derivation methods to suit your needs.
+
+- **Client-Side Modifications:**
+
+  Extend the `NanoShutterCrypto` class with additional methods or integrate it into frameworks like React or Angular.
 
 ---
 
-**Note:** This application is intended for educational purposes to illustrate cryptographic concepts in a web-based game. For production use, thoroughly review and enhance security measures to meet industry standards.
+## Limitations
+
+- **Security:**
+
+  NanoShutter is intended for educational and demonstration purposes. It lacks the robustness and security features of the full Shutter protocol.
+
+- **Single Point of Failure:**
+
+  The API server acts as a centralized component, which is not suitable for production environments requiring decentralization.
+
+- **No Consensus Mechanism:**
+
+  NanoShutter does not implement a consensus mechanism or handle adversarial conditions.
+
+---
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. **Fork the Repository**
+
+2. **Create a Branch**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Commit Your Changes**
+
+   ```bash
+   git commit -m "Add your message"
+   ```
+
+4. **Push to the Branch**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+5. **Open a Pull Request**
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- [Shutter Network](https://shutter.network/) for the inspiration and underlying concepts.
+- [libsodium](https://libsodium.gitbook.io/doc/) and [PyNaCl](https://pynacl.readthedocs.io/) for cryptographic functions.
+- Participants and organizers of hackathons promoting innovation and learning.
+
+---
+
+**Disclaimer:** NanoShutter is not affiliated with or endorsed by the Shutter Network. It is a simplified tool created for learning and hackathon projects.
+
+**Contact:** For questions or support, please open an issue on the repository or reach out to [your-email@example.com](mailto:your-email@example.com).
+
+---
+
+Happy hacking!
