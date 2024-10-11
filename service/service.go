@@ -2,11 +2,9 @@ package service
 
 import (
 	"encoding/hex"
-	"fmt"
 	"nano-shutter/dkg"
 	"nano-shutter/internal/error"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -16,28 +14,21 @@ import (
 
 type EncryptRequest struct {
 	CypherText string `json:"cypher_text" binding:"required"`
+	Timestamp  int64  `json:"timestamp" binding:"required"`
 }
 
 type DecryptRequest struct {
 	EncyptedMsg string `json:"encrypted_msg" binding:"required"`
-	Identifier  string `json:"identifier" binding:"required"`
+	Timestamp   int64  `json:"timestamp" binding:"required"`
 }
 
 type Service struct {
 	dkg.DKG
-	CurrentEpochTimestamp int64
-	EpochDelay            int64
 }
 
 func NewService(dkg dkg.DKG) Service {
-	epochDelayStr := os.Getenv("EPOCH_DELAY")
-	epochDelay, err := strconv.ParseInt(epochDelayStr, 10, 0)
-	if err != nil {
-		panic(fmt.Sprintf("failed to get epoch delay: %w", err))
-	}
 	return Service{
-		DKG:        dkg,
-		EpochDelay: epochDelay,
+		DKG: dkg,
 	}
 }
 
@@ -53,12 +44,7 @@ func (srv *Service) Encrypt(c *gin.Context) {
 		return
 	}
 
-	currentTimestamp := time.Now().UTC().Unix()
-
-	if srv.CurrentEpochTimestamp == 0 || currentTimestamp-srv.CurrentEpochTimestamp >= srv.EpochDelay {
-		srv.CurrentEpochTimestamp = currentTimestamp
-	}
-	epochStr := strconv.FormatInt(srv.CurrentEpochTimestamp, 16)
+	epochStr := strconv.FormatInt(requestBody.Timestamp, 16)
 	epochbyte, err := hex.DecodeString(epochStr)
 	if err != nil {
 		err := error.NewHttpError(
@@ -79,8 +65,7 @@ func (srv *Service) Encrypt(c *gin.Context) {
 	encryptedMsg := shcrypto.Encrypt([]byte(requestBody.CypherText), srv.PublicKey, epochId, sigma)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":    hex.EncodeToString(encryptedMsg.Marshal()),
-		"identifier": epochStr,
+		"message": hex.EncodeToString(encryptedMsg.Marshal()),
 	})
 }
 
@@ -96,19 +81,9 @@ func (srv *Service) Decrypt(c *gin.Context) {
 		return
 	}
 
-	timestamp, err := strconv.ParseInt(requestBody.Identifier, 16, 0)
-	if err != nil {
+	if time.Now().UTC().Unix()-requestBody.Timestamp < 0 {
 		err := error.NewHttpError(
-			"failed to marshal identifier",
-			"request body unmarshalling error",
-			http.StatusBadRequest,
-		)
-		c.Error(err)
-		return
-	}
-	if time.Now().UTC().Unix()-timestamp <= srv.EpochDelay {
-		err := error.NewHttpError(
-			"epoch did not end",
+			"time has not elapsed",
 			"too early decryption",
 			http.StatusBadRequest,
 		)
@@ -116,7 +91,8 @@ func (srv *Service) Decrypt(c *gin.Context) {
 		return
 	}
 
-	iden, err := hex.DecodeString(requestBody.Identifier)
+	epochStr := strconv.FormatInt(requestBody.Timestamp, 16)
+	iden, err := hex.DecodeString(epochStr)
 	if err != nil {
 		err := error.NewHttpError(
 			"error parsing identifier",
@@ -127,7 +103,6 @@ func (srv *Service) Decrypt(c *gin.Context) {
 		return
 	}
 
-	//TODO: check for time elapsed
 	epochId := shcrypto.ComputeEpochID(iden)
 
 	secretKeyShare := shcrypto.ComputeEpochSecretKeyShare(srv.SecretKeyShare, epochId)
