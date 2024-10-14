@@ -115,6 +115,9 @@
       // Variable to control the game state
       let gameInProgress = true;
 
+      // Variable to store the encryption timestamp
+      let encryptionTimestamp = Math.floor(Date.now() / 1000) + 20;
+
       document.getElementById('submitPlayer1').onclick = async () => {
         if (!gameInProgress) return;
 
@@ -123,7 +126,7 @@
         // Encrypt the move using the time-based encryption endpoint
         const response = await axios.post(`${apiBaseUrl}/encrypt/with_time`, {
           cypher_text: move,
-          timestamp: Math.floor(Date.now() / 1000)
+          timestamp: encryptionTimestamp
         });
 
         encryptedData.player1 = response.data.message;
@@ -142,7 +145,7 @@
         // Encrypt the move using the time-based encryption endpoint
         const response = await axios.post(`${apiBaseUrl}/encrypt/with_time`, {
           cypher_text: move,
-          timestamp: Math.floor(Date.now() / 1000)
+          timestamp: encryptionTimestamp
         });
 
         encryptedData.player2 = response.data.message;
@@ -158,6 +161,7 @@
         encryptedData = {};
         decryptedMoves = {};
         gameInProgress = true;
+        encryptionTimestamp = Math.floor(Date.now() / 1000) + 20;
         document.getElementById('status').textContent = 'Waiting for players to submit their moves...';
         document.getElementById('encryptedMoves').innerHTML = '';
         document.getElementById('decryptedMoves').textContent = '';
@@ -203,14 +207,14 @@
             if (!decryptedMoves.player1) {
               const response = await axios.post(`${apiBaseUrl}/decrypt/with_time`, {
                 encrypted_msg: encryptedData.player1,
-                timestamp: Math.floor(Date.now() / 1000)
+                timestamp: encryptionTimestamp
               });
               decryptedMoves.player1 = response.data.message;
             }
             if (!decryptedMoves.player2) {
               const response = await axios.post(`${apiBaseUrl}/decrypt/with_time`, {
                 encrypted_msg: encryptedData.player2,
-                timestamp: Math.floor(Date.now() / 1000)
+                timestamp: encryptionTimestamp
               });
               decryptedMoves.player2 = response.data.message;
             }
