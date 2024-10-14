@@ -4,6 +4,9 @@ NanoShutter is a simplified implementation of the [Shutter Network](https://shut
 
 NanoShutter allows you to encrypt messages or transactions that can only be decrypted after a certain time (epoch), enabling use cases like front-running protection, sealed-bid auctions, or fair multiplayer games.
 
+![ezgif-6-1044641a13](https://github.com/user-attachments/assets/e701a287-4f8c-4872-aca1-f6eb5de63f8a)
+
+
 ## Table of Contents
 
 - [Introduction](#introduction)
