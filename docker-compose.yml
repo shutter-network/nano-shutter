@@ -9,11 +9,11 @@ services:
     labels:
       caddy: "${SERVICE_DOMAIN_NAME}"
       caddy.@cors: "method OPTIONS"
+      caddy.respond.@cors: "204"
       caddy.reverse_proxy: "{{ upstreams 5000 }}"
       caddy.header.Access-Control-Allow-Origin: "*"
       caddy.header.Access-Control-Allow-Methods: "GET, POST, OPTIONS, PUT, DELETE"
       caddy.header.Access-Control-Allow-Headers: "Content-Type, Authorization"
-      caddy.respond.@cors: "200"
 
   caddy:
     image: lucaslorentz/caddy-docker-proxy:latest
