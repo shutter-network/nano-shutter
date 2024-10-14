@@ -39,7 +39,7 @@ NanoShutter allows you to encrypt messages or transactions that can only be decr
 The NanoShutter API provides four main endpoints:
 
 1. **Time-Based Encryption**: `/encrypt/with_time`
-   - Encrypts a message based on the current timestamp.
+   - Encrypts a message for a future decryption, based on a timestamp in the future.
 
 2. **Time-Based Decryption**: `/decrypt/with_time`
    - Decrypts a message after the specified time has elapsed.
@@ -158,7 +158,7 @@ DKG_SECRET_KEY=your_secret_key_here
 
 #### 1. **Time-Based Encryption**
 
-Send a POST request to `/encrypt/with_time` with the message and timestamp to encrypt.
+Send a POST request to `/encrypt/with_time` with the message and timestamp to encrypt (e.g. 60 seconds in the future).
 
 **Request Body Example:**
 
@@ -179,7 +179,7 @@ Send a POST request to `/encrypt/with_time` with the message and timestamp to en
 
 #### 2. **Time-Based Decryption**
 
-Send a POST request to `/decrypt/with_time` with the encrypted message and timestamp.
+Send a POST request to `/decrypt/with_time` with the encrypted message and the same timestamp used previously.
 
 **Request Body Example:**
 
