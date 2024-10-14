@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shutterized Rock Paper Scissors</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .player-section {
+      margin-bottom: 30px;
+    }
+    .data-section {
+      word-wrap: break-word;
+      background-color: #f8f9fa;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .status {
+      font-weight: bold;
+    }
+    .game-result {
+      font-size: 1.5em;
+      color: #28a745;
+      text-align: center;
+    }
+    .btn-new-game {
+      display: block;
+      margin: 20px auto;
+    }
+    .key-section {
+      font-family: monospace;
+      white-space: pre-wrap;
+      background-color: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>Shutterized Rock Paper Scissors</h1>
+
+    <!-- Player 1 -->
+    <div class="player-section">
+      <h2>Player 1</h2>
+      <div class="form-group">
+        <label for="movePlayer1">Choose your move:</label>
+        <select id="movePlayer1" class="form-control">
+          <option value="Rock">Rock</option>
+          <option value="Paper">Paper</option>
+          <option value="Scissors">Scissors</option>
+        </select>
+      </div>
+      <button id="submitPlayer1" class="btn btn-primary">Submit Move</button>
+    </div>
+
+    <!-- Player 2 -->
+    <div class="player-section">
+      <h2>Player 2</h2>
+      <div class="form-group">
+        <label for="movePlayer2">Choose your move:</label>
+        <select id="movePlayer2" class="form-control">
+          <option value="Rock">Rock</option>
+          <option value="Paper">Paper</option>
+          <option value="Scissors">Scissors</option>
+        </select>
+      </div>
+      <button id="submitPlayer2" class="btn btn-primary">Submit Move</button>
+    </div>
+
+    <!-- Status Message -->
+    <h2>Status</h2>
+    <p id="status" class="status">Waiting for players to submit their moves...</p>
+
+    <!-- Encrypted Moves -->
+    <h2>Encrypted Moves</h2>
+    <div id="encryptedMoves" class="data-section"></div>
+
+    <!-- Decrypted Moves -->
+    <h2>Decrypted Moves</h2>
+    <div id="decryptedMoves" class="data-section"></div>
+
+    <!-- Game Result -->
+    <h2>Game Result</h2>
+    <p id="gameResult" class="game-result"></p>
+
+    <!-- New Game Button -->
+    <button id="newGame" class="btn btn-success btn-new-game">Start New Game</button>
+  </div>
+
+  <!-- Include Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <!-- Main Script -->
+  <script>
+    (async () => {
+      const apiBaseUrl = 'https://nanoshutter.staging.shutter.network';
+
+      // Store encrypted data for both players
+      let encryptedData = {};
+
+      // Store decrypted moves
+      let decryptedMoves = {};
+
+      // Variable to control the game state
+      let gameInProgress = true;
+
+      // Variable to store the encryption timestamp
+      let encryptionTimestamp = Math.floor(Date.now() / 1000) + 20;
+
+      document.getElementById('submitPlayer1').onclick = async () => {
+        if (!gameInProgress) return;
+
+        const move = document.getElementById('movePlayer1').value;
+
+        // Encrypt the move using the time-based encryption endpoint
+        const response = await axios.post(`${apiBaseUrl}/encrypt/with_time`, {
+          cypher_text: move,
+          timestamp: encryptionTimestamp
+        });
+
+        encryptedData.player1 = response.data.message;
+
+        // Display encrypted data
+        displayEncryptedMoves();
+
+        document.getElementById('status').textContent = 'Player 1 move submitted.';
+      };
+
+      document.getElementById('submitPlayer2').onclick = async () => {
+        if (!gameInProgress) return;
+
+        const move = document.getElementById('movePlayer2').value;
+
+        // Encrypt the move using the time-based encryption endpoint
+        const response = await axios.post(`${apiBaseUrl}/encrypt/with_time`, {
+          cypher_text: move,
+          timestamp: encryptionTimestamp
+        });
+
+        encryptedData.player2 = response.data.message;
+
+        // Display encrypted data
+        displayEncryptedMoves();
+
+        document.getElementById('status').textContent = 'Player 2 move submitted.';
+      };
+
+      // Function to reset the game
+      function resetGame() {
+        encryptedData = {};
+        decryptedMoves = {};
+        gameInProgress = true;
+        encryptionTimestamp = Math.floor(Date.now() / 1000) + 20;
+        document.getElementById('status').textContent = 'Waiting for players to submit their moves...';
+        document.getElementById('encryptedMoves').innerHTML = '';
+        document.getElementById('decryptedMoves').textContent = '';
+        document.getElementById('gameResult').textContent = '';
+      }
+
+      // New Game button handler
+      document.getElementById('newGame').onclick = () => {
+        resetGame();
+      };
+
+      // Function to display encrypted moves nicely
+      function displayEncryptedMoves() {
+        const container = document.getElementById('encryptedMoves');
+        container.innerHTML = '';
+
+        for (let player in encryptedData) {
+          const panel = document.createElement('div');
+          panel.className = 'panel panel-default';
+
+          const panelHeading = document.createElement('div');
+          panelHeading.className = 'panel-heading';
+          panelHeading.textContent = `Encrypted Move - ${player}`;
+          panel.appendChild(panelHeading);
+
+          const panelBody = document.createElement('div');
+          panelBody.className = 'panel-body key-section';
+          panelBody.textContent = encryptedData[player];
+
+          panel.appendChild(panelBody);
+          container.appendChild(panel);
+        }
+      }
+
+      // Periodically attempt to decrypt moves
+      const intervalId = setInterval(async () => {
+        try {
+          if (!gameInProgress) return;
+
+          // Check if both players have submitted their moves
+          if (encryptedData.player1 && encryptedData.player2) {
+            // Decrypt moves if not already decrypted
+            if (!decryptedMoves.player1) {
+              const response = await axios.post(`${apiBaseUrl}/decrypt/with_time`, {
+                encrypted_msg: encryptedData.player1,
+                timestamp: encryptionTimestamp
+              });
+              decryptedMoves.player1 = response.data.message;
+            }
+            if (!decryptedMoves.player2) {
+              const response = await axios.post(`${apiBaseUrl}/decrypt/with_time`, {
+                encrypted_msg: encryptedData.player2,
+                timestamp: encryptionTimestamp
+              });
+              decryptedMoves.player2 = response.data.message;
+            }
+
+            // Display decrypted moves
+            document.getElementById('decryptedMoves').textContent = JSON.stringify(decryptedMoves, null, 2);
+
+            // Determine the winner
+            const result = determineWinner(decryptedMoves.player1, decryptedMoves.player2);
+
+            // Display the result
+            document.getElementById('gameResult').textContent = result;
+
+            // Game is over
+            gameInProgress = false;
+
+            document.getElementById('status').textContent = 'Game concluded.';
+          } else {
+            document.getElementById('status').textContent = 'Waiting for both players to submit moves...';
+          }
+        } catch (e) {
+          if (e.response && e.response.status === 400) {
+            document.getElementById('status').textContent = 'Waiting for decryption keys to become available...';
+          } else {
+            console.error('Error during decryption:', e);
+            document.getElementById('status').textContent = 'An error occurred during decryption.';
+            gameInProgress = false;
+          }
+        }
+      }, 5000); // Try every 5 seconds
+
+      // Function to determine the winner
+      function determineWinner(move1, move2) {
+        if (move1 === move2) {
+          return 'Its a tie!';
+        }
+
+        if (
+          (move1 === 'Rock' && move2 === 'Scissors') ||
+          (move1 === 'Paper' && move2 === 'Rock') ||
+          (move1 === 'Scissors' && move2 === 'Paper')
+        ) {
+          return 'Player 1 wins!';
+        } else {
+          return 'Player 2 wins!';
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
