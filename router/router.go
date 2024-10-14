@@ -5,6 +5,7 @@ import (
 	"nano-shutter/internal/middleware"
 	"nano-shutter/service"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,7 @@ func NewRouter(ctx context.Context, srv service.Service) *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middleware.ErrorHandler())
+	router.Use(cors.Default())
 
 	encrypt := router.Group("/encrypt")
 	{

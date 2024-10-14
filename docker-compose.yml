@@ -8,10 +8,10 @@ services:
     command: ["./nano-shutter"]
     labels:
       caddy: "${SERVICE_DOMAIN_NAME}"
-      caddy.@browser: "method POST"
+      caddy.@browser: "method GET"
       caddy.reverse_proxy: "{{ upstreams 5000 }}"
       caddy.header.Access-Control-Allow-Origin: "*"
-      caddy.header.Access-Control-Allow-Methods: "GET, POST, OPTIONS"
+      caddy.header.Access-Control-Allow-Methods: "GET, POST, OPTIONS, PUT, DELETE"
       caddy.header.Access-Control-Allow-Headers: "Content-Type, Authorization"
 
   caddy:
