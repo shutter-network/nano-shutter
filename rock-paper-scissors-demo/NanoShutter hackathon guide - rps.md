@@ -100,27 +100,14 @@ git clone https://github.com/shutter-network/nanoshutter.git
 ```
 
 ### 2. Install Dependencies
-Navigate to the cloned folder and install the required dependencies:
+Navigate to the cloned folder
 ```sh
-cd nanoshutter
-npm install
+cd nanoshutter/rock-paper-scissors-demo
 ```
 
-### 3. Environment Setup
-Configure the `.env` file with appropriate values. You can use the `.env.example` file as a reference:
-```sh
-cp .env.example .env
-```
-Make sure to update any necessary configurations.
+### 3. Run the API Server, or use the prdeployed one.
 
-### 4. Run the API Server
-Start the server locally:
-```sh
-npm start
-```
-The API should now be running on `http://localhost:5000` by default.
-
-### 5. Update the HTML File to Use Your Local API
+### 4. Update the HTML File to Use Your Local API
 If you are running your own version of the API, change the `apiBaseUrl` in the HTML code to point to your local server:
 ```javascript
 const apiBaseUrl = 'http://localhost:5000';
@@ -132,7 +119,7 @@ This will make sure all encryption and decryption requests are directed to your 
 - **Understand Timing**: Ensure your timestamps for encryption and decryption match up to avoid decryption failures.
 - **Debugging**: Use the browser console to inspect errors during encryption/decryption.
 - **Collaboration**: Use version control (e.g., GitHub) to collaborate with teammates effectively.
-- **Extend the Game**: Consider extending the game to add new features, such as player authentication or storing game history on-chain.
+- **Extend the Game**: You can also consider extending the game to add new features, such as player authentication or storing game history on-chain.
 
 ## Conclusion
 

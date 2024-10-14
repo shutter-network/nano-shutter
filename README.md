@@ -85,7 +85,6 @@ If you want to operate your own instance of the NanoShutter API, follow these st
 
 - **Go** (version 1.16 or higher)
 - **Docker** (optional, for containerized deployment)
-- **GNU Make** (optional, for simplified commands)
 
 #### Installation
 
@@ -93,7 +92,7 @@ If you want to operate your own instance of the NanoShutter API, follow these st
 
    ```bash
    git clone https://github.com/your-username/nanoshutter.git
-   cd nanoshutter
+   cd nanoshutter/api
    ```
 
 2. **Install Dependencies:**
@@ -145,14 +144,11 @@ If you want to operate your own instance of the NanoShutter API, follow these st
 Use the `.env` file to configure the application settings, such as:
 
 - **PORT**: The port on which the service runs.
-- **DKG Settings**: Public/Private key configurations for distributed key generation.
 
 ### Example `.env` File:
 
 ```env
 PORT=8080
-DKG_PUBLIC_KEY=your_public_key_here
-DKG_SECRET_KEY=your_secret_key_here
 ```
 
 ## Usage
