@@ -13,7 +13,7 @@ services:
       caddy.header.Access-Control-Allow-Origin: "*"
       caddy.header.Access-Control-Allow-Methods: "GET, POST, OPTIONS, PUT, DELETE"
       caddy.header.Access-Control-Allow-Headers: "Content-Type, Authorization"
-      caddy.respond.@cors: "204"
+      caddy.respond.@cors: "200"
 
   caddy:
     image: lucaslorentz/caddy-docker-proxy:latest
