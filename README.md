@@ -65,6 +65,38 @@ We provide the following testing URLs that you can use to interact with the Nano
   - `https://nanoshutter.staging.shutter.network/encrypt/custom`
   - `https://nanoshutter.staging.shutter.network/decrypt/custom`
 
+
+## Hackathon Ideas
+
+NanoShutter is an ideal tool for experimenting with time-locked encryption in various hackathon scenarios. Below are some ideas to inspire you at your next hackathon:
+
+### 1. **Shutterized Multiplayer Games**
+   - Build games like Rock Paper Scissors, where players commit their moves and decrypt them simultaneously using NanoShutter, ensuring fairness.
+
+### 2. **Sealed-Bid Auctions**
+   - Create a decentralized auction where bids are encrypted and revealed only after a specific time, using the NanoShutter API for transparent and fair bidding.
+
+### 3. **Front-Running Protection for DApps**
+   - Integrate NanoShutter into a decentralized exchange (DEX) to enable front-running protection by encrypting trades before they are submitted for execution.
+
+### 4. **Salary Negotiation Tool**
+   - Develop a privacy-focused negotiation tool that allows individuals to submit encrypted salary offers that are revealed after both parties have committed, ensuring transparency and fairness.
+
+### 5. **Blind Voting Application**
+   - Build a simple voting application where votes are encrypted until the voting period ends, enabling privacy-preserving decision-making in decentralized environments.
+
+### 6. **Token-Gated Content Release**
+   - Use NanoShutter to create a platform for releasing premium content (e.g., music, art) only after a certain time or when conditions are met, enabling timed exclusive access.
+
+### 7. **Blind Fundraising Campaigns**
+   - Create a platform for charitable donations where donation amounts are encrypted and revealed only after the campaign ends, preventing strategic donations and promoting fairness.
+
+### 8. **Encryption-Backed Trivia Game**
+   - Design a trivia game where questions and answers are encrypted, and participants reveal their answers simultaneously after the question is closed, maintaining fairness and fun.
+
+These hackathon ideas are just starting points. Feel free to modify, combine, or expand on them to create unique and impactful projects using NanoShutter!
+
+
 ## Getting Started
 
 ### Using Our Provided API
