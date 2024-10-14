@@ -12,14 +12,24 @@ import (
 	"github.com/shutter-network/shutter/shlib/shcrypto"
 )
 
-type EncryptRequest struct {
+type EncryptWithTimeRequest struct {
 	CypherText string `json:"cypher_text" binding:"required"`
 	Timestamp  int64  `json:"timestamp" binding:"required"`
 }
 
-type DecryptRequest struct {
+type DecryptWithTimeRequest struct {
 	EncyptedMsg string `json:"encrypted_msg" binding:"required"`
 	Timestamp   int64  `json:"timestamp" binding:"required"`
+}
+
+type EncryptCustomRequest struct {
+	CypherText string `json:"cypher_text" binding:"required"`
+	EpochId    string `json:"epoch_id" binding:"required"`
+}
+
+type DecryptCustomRequest struct {
+	EncyptedMsg string `json:"encrypted_msg" binding:"required"`
+	EpochId     string `json:"epoch_id" binding:"required"`
 }
 
 type Service struct {
@@ -32,8 +42,8 @@ func NewService(dkg dkg.DKG) Service {
 	}
 }
 
-func (srv *Service) Encrypt(c *gin.Context) {
-	var requestBody EncryptRequest
+func (srv *Service) EncryptWithTime(c *gin.Context) {
+	var requestBody EncryptWithTimeRequest
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		err := error.NewHttpError(
 			"request body not found",
@@ -69,8 +79,33 @@ func (srv *Service) Encrypt(c *gin.Context) {
 	})
 }
 
-func (srv *Service) Decrypt(c *gin.Context) {
-	var requestBody DecryptRequest
+func (srv *Service) EncryptCustom(c *gin.Context) {
+	var requestBody EncryptCustomRequest
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		err := error.NewHttpError(
+			"request body not found",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	epochId := shcrypto.ComputeEpochID([]byte(requestBody.EpochId))
+
+	timestampStr := strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	var sigma [32]byte
+	copy(sigma[:], []byte(timestampStr))
+
+	encryptedMsg := shcrypto.Encrypt([]byte(requestBody.CypherText), srv.PublicKey, epochId, sigma)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": hex.EncodeToString(encryptedMsg.Marshal()),
+	})
+}
+
+func (srv *Service) DecryptWithTime(c *gin.Context) {
+	var requestBody DecryptWithTimeRequest
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		err := error.NewHttpError(
 			"request body not found",
@@ -104,6 +139,72 @@ func (srv *Service) Decrypt(c *gin.Context) {
 	}
 
 	epochId := shcrypto.ComputeEpochID(iden)
+
+	secretKeyShare := shcrypto.ComputeEpochSecretKeyShare(srv.SecretKeyShare, epochId)
+	secretKey, err := shcrypto.ComputeEpochSecretKey([]int{0}, []*shcrypto.EpochSecretKeyShare{secretKeyShare}, 1)
+	if err != nil {
+		err := error.NewHttpError(
+			"secretKey not found",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	var encMsg shcrypto.EncryptedMessage
+
+	msg, err := hex.DecodeString(requestBody.EncyptedMsg)
+	if err != nil {
+		err := error.NewHttpError(
+			"failed to decode encrypted msg",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	if err := encMsg.Unmarshal(msg); err != nil {
+		println(err)
+		err := error.NewHttpError(
+			"failed to unmarshal encrypted msg",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	decryptedMsg, err := encMsg.Decrypt(secretKey)
+	if err != nil {
+		err := error.NewHttpError(
+			"failed to decrypt",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": string(decryptedMsg),
+	})
+}
+
+func (srv *Service) DecryptCustom(c *gin.Context) {
+	var requestBody DecryptCustomRequest
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		err := error.NewHttpError(
+			"request body not found",
+			"request body unmarshalling error",
+			http.StatusBadRequest,
+		)
+		c.Error(err)
+		return
+	}
+
+	epochId := shcrypto.ComputeEpochID([]byte(requestBody.EpochId))
 
 	secretKeyShare := shcrypto.ComputeEpochSecretKeyShare(srv.SecretKeyShare, epochId)
 	secretKey, err := shcrypto.ComputeEpochSecretKey([]int{0}, []*shcrypto.EpochSecretKeyShare{secretKeyShare}, 1)

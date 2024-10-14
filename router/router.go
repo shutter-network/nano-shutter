@@ -14,8 +14,17 @@ func NewRouter(ctx context.Context, srv service.Service) *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(middleware.ErrorHandler())
 
-	router.POST("/encrypt", srv.Encrypt)
-	router.POST("/decrypt", srv.Decrypt)
+	encrypt := router.Group("/encrypt")
+	{
+		encrypt.POST("/with_time", srv.EncryptWithTime)
+		encrypt.POST("/custom", srv.EncryptCustom)
+	}
+
+	decrypt := router.Group("/decrypt")
+	{
+		decrypt.POST("/with_time", srv.DecryptWithTime)
+		decrypt.POST("/custom", srv.DecryptCustom)
+	}
 
 	return router
 }
