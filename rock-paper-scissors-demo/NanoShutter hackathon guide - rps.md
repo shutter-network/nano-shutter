@@ -4,6 +4,8 @@
 
 Welcome to this hackathon guide! This guide will walk you through building a Rock Paper Scissors game utilizing NanoShutter's encryption/decryption API. The game leverages Shutter-like threshold encryption to ensure fairness, providing an engaging way to experience blockchain cryptography.
 
+![ezgif-6-1044641a13](https://github.com/user-attachments/assets/9b3e82d5-dd4f-4190-aff1-8a102b8bf999)
+
 ### What You'll Learn:
 - How to use the NanoShutter API for time-based encryption and decryption.
 - Building a web application with JavaScript and HTML to implement a simple two-player game.
