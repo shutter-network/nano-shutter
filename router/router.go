@@ -14,6 +14,7 @@ func NewRouter(ctx context.Context, srv service.Service) *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(middleware.ErrorHandler())
 
+	router.GET("/", srv.GetHandler)
 	encrypt := router.Group("/encrypt")
 	{
 		encrypt.POST("/with_time", srv.EncryptWithTime)

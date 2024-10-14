@@ -42,6 +42,12 @@ func NewService(dkg dkg.DKG) Service {
 	}
 }
 
+func (srv *Service) GetHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"requests_available": "encrypt/with_time, encrypt/custom, decrypt/with_time, decrypt/custom",
+	})
+}
+
 func (srv *Service) EncryptWithTime(c *gin.Context) {
 	var requestBody EncryptWithTimeRequest
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
